@@ -1,4 +1,4 @@
-# codding=utf-8
+# coding=utf-8
 from random import randrange, choice
 
 import logging
@@ -26,28 +26,41 @@ class ElSimulator:
 
         logging.info('request %d %s: floor request %d',n, call_type, floor_request)
 
-        # choose elevator
-        # elevator_number = randrange(self.elevator_number)
-        # elevator = self.elevator_list[elevator_number]
+        # choose the nearest elevator
         elevator = self.choose_elevator(floor_request, n)
 
-        # move elevator with move time simulation
-        if elevator.position != floor_request:
-            if elevator.position < floor_request:
-                direction = 'move_up'
+        # no elevator is free
+        if elevator is not None:
+            # move elevator with move time simulation
+            if elevator.position != floor_request:
+                # what's the direction
+                if elevator.position < floor_request:
+                    direction = 'move_up'
+                else:
+                    direction = 'move_down'
+
+                logging.info('%s elevator %d for request %d',direction, elevator.id, n)
+
+                # move elevator
+                elevator.move(direction, call_type, floor_request)
+                logging.info('stop elevator %d for request %d',elevator.id, n)
             else:
-                direction = 'move_down'
-            # direction = choice(['move_up', 'move_down'])
-            logging.info('%s elevator %d for request %d',direction, elevator.id, n)
-            elevator.move(direction, call_type, floor_request)
-            logging.info('stop elevator %d for request %d',elevator.id, n)
+                logging.info('stop elevator %d for request %d',elevator.id, n)
+
+            
 
     def choose_elevator(self, cur_request, nrequest):
-        elevator_list_free = [x for x in self.elevator_list if not x.locked or x.position == cur_request]
-        elevator =min(elevator_list_free, key=lambda x:abs(x.position-cur_request))
-        if elevator :
+        # construct a list with valid elevator
+        elevator_list_free = [x for x in self.elevator_list if (not x.locked or x.position == cur_request) and x.request_number <= self.floor_number/self.elevator_number]
+        
+        # test if there is elevator(s) available
+        if elevator_list_free:
+            # select the nearest elevator
+            elevator =min(elevator_list_free, key=lambda x:abs(x.position-cur_request))
             elevator.locked = True
-        logging.info('choose elevator %d which is at position %d for request %d',elevator.id, elevator.position, nrequest)
+            logging.info('choose elevator %d which is at position %d for request %d (floor %d)',elevator.id, elevator.position, nrequest, cur_request)
+        else:
+            elevator = None
         return elevator
 
 if __name__ == '__main__':

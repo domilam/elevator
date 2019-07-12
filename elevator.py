@@ -15,15 +15,13 @@ class Elevator:
         self.call_type = call_type
         self.request_number += 1
 
-        # simulate move time
         if self.direction == 'move_up':
             step = 1
-            shift = 1
         elif self.direction == 'move_down':
             step = -1
-            shift = -1
-
-        for m in range(self.position, floor_request+shift, step):
+        
+        # simulate the movement of the elevator
+        for m in range(self.position, floor_request+step, step):
             time.sleep(0.5)
             self.position = m
             print('Elevator {} at floor {}'.format(self.id, self.position))
